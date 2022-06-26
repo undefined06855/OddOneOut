@@ -184,15 +184,23 @@
             
             pausemenu.innerText = "Press space to start";
 
-            window.addEventListener("keydown", event => {
-                if (event.code == "Space" && !running)
-                {
-                    running = true;
-                    pausemenu.style.opacity = 0;
-                    timer.style.display = "block";
-                    maingame();
-                }    
-            })
+            if (mobile)
+            {
+                pausemenu.style.opacity = 1;
+                pausemenu.innerHTML = "You are on a mobile device.<br/>Please switch to a computer.<br/><br/><noscript>Also, turn on javascript while you're at it</noscript>"
+            }
+            else
+            {
+                window.addEventListener("keydown", event => {
+                    if (event.code == "Space" && !running)
+                    {
+                        running = true;
+                        pausemenu.style.opacity = 0;
+                        timer.style.display = "block";
+                        maingame();
+                    }    
+                })
+            }
 
 
             //FUNCTIONS
@@ -219,13 +227,13 @@
 
             function pulse(col)
             {
-                document.body.style.transition = "background-color .2s linear";
+                document.body.style.transition = "background-color .05s linear";
                 document.body.style.backgroundColor = col;
 
                 setTimeout(() => {
-                    document.body.style.transition = "background-color 1s linear";
+                    document.body.style.transition = "background-color .5s linear";
                     document.body.style.backgroundColor = "#fff";
-                }, 200);
+                }, 75);
             }
 
             function onbtnclick(element)
@@ -332,58 +340,50 @@
 
             function maingame()
             {
-                if (mobile)
-                {
-                    pausemenu.style.opacity = 1;
-                    pausemenu.innerHTML = "You are on a mobile device.<br/>Please switch to a computer.<br/><br/><noscript>Also, turn on javascript while you're at it</noscript>"
-                }
-                else
-                {
-                    window.addEventListener("resize", resize);
-                    resize();
+                window.addEventListener("resize", resize);
+                resize();
 
-                    document.addEventListener("keydown", event => {
-                        if (event.code == "Escape")
+                document.addEventListener("keydown", event => {
+                    if (event.code == "Escape")
+                    {
+                        if (!inpausetime)
                         {
-                            if (!inpausetime)
+                            if (!paused)
                             {
-                                if (!paused)
-                                {
-                                    pausemenu.innerText = "Pause";
+                                pausemenu.innerText = "Pause";
 
-                                    pausemenu.style.opacity = 1;
-                                    game.style.display = "none";
-                                    clearInterval(interval);
-                                    paused = true;
-                                }
-                                else
-                                {
-                                    pausetime = 5;
+                                pausemenu.style.opacity = 1;
+                                game.style.display = "none";
+                                clearInterval(interval);
+                                paused = true;
+                            }
+                            else
+                            {
+                                pausetime = 5;
+                                pausemenu.innerText = pausetime;
+                                inpausetime = true;
+                                pauseint = setInterval(() => {
+                                    pausetime--;
+
                                     pausemenu.innerText = pausetime;
-                                    inpausetime = true;
-                                    pauseint = setInterval(() => {
-                                        pausetime--;
 
-                                        pausemenu.innerText = pausetime;
+                                    if (pausetime <= 0)
+                                        clearInterval(pauseint)
+                                }, 1000);
 
-                                        if (pausetime <= 0)
-                                            clearInterval(pauseint)
-                                    }, 1000);
+                                setTimeout(() => {
+                                    pausemenu.style.opacity = 0;
+                                    game.style.display = "initial";
+                                    interval = setInterval(intervalFunc, 1000);
+                                    paused = false;
+                                    inpausetime = false;
 
-                                    setTimeout(() => {
-                                        pausemenu.style.opacity = 0;
-                                        game.style.display = "initial";
-                                        interval = setInterval(intervalFunc, 1000);
-                                        paused = false;
-                                        inpausetime = false;
-
-                                    }, 5000);
-                                }
+                                }, 5000);
                             }
                         }
-                    });
-                    loop();
-                }
+                    }
+                });
+                loop();
             }
         </script>
     </body>
