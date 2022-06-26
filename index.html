@@ -28,13 +28,14 @@
                 width: auto;
                 height: auto;
 
-                border-radius: 5%;
+                border-radius: .5vw;
                 border: 2px solid black;
                 text-align: center;
 
                 overflow: hidden;
 
                 font-family: "Spline Sans Mono", "Courier New", Courier, monospace;
+                font-size: 2vh;
 
                 background-color: rgba(255, 245, 237, .3);
 
@@ -69,6 +70,8 @@
 
                 width: 100vw;
                 height: 100vh;
+
+                transition: opacity .5s linear;
             }
 
             #pause, #subtitle {
@@ -81,11 +84,26 @@
 
                 font-family: "Titan One", 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
                 transition: opacity .2s linear;
+
+                background-color: rgb(237,237,237);
+                background-image: linear-gradient(to bottom right, rgba(118, 237, 237, .7) 0%, rgba(219, 219, 219, .7) 100%);
+                background-size: 85vw;
+                background-position: center;
+                background-attachment: fixed;  /* <- here it is */
+
+                border-radius: 5px;
+
+                padding-left: 1vw;
+                padding-right: 1vw;
+                padding-bottom: 1vh;
+                padding-top: 1vh;
             }
+
 
             #subtitle {
                 font-size: 2vh;
-                color:rgb(163, 163, 163)
+                color: rgb(122, 122, 122);
+                text-align: center;
             }
             
             #pausewrapper {
@@ -138,8 +156,9 @@
             <div id="pause">
                 <noscript>Please enable javascript for this to work.</noscript>
             </div>
+            &nbsp;
             <div id="subtitle">
-                Press esc to pause!
+                ...Something broke...
             </div>
         </div>
         
@@ -199,10 +218,10 @@
                 }
                 , hex = [ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f" ]
                 ;
-            var score = 1
+            var score = 18
               , id = -1
               , odd = -1
-              , letter = "something broken :(("
+              , letter = "Something broke..."
               , time = 3
               , paused = false
               , interval
@@ -212,15 +231,17 @@
               , failed = false
               , lvltwo = false
               , col = "#err"
+              , fadeout = -1
 
             game.style.display = "block";
             
-            pausemenu.innerText = "Press space to start";
+            pausemenu.innerHTML = "Press spacebar to start";
+            subtitle.innerHTML = "Press esc to pause!<br/><br/><small>Please note: this game is not compatible with screen readers or using tab to navigate.</small>"
 
             if (mobile)
             {
                 pausemenu.style.opacity = 1;
-                pausemenu.innerHTML = "You are on a mobile device.<br/>Please switch to a computer.<br/><br/><noscript>Also, turn on javascript while you're at it</noscript>"
+                pausemenu.innerHTML = "<hr/>You are on a mobile device.<br/>Please switch to a computer.<hr/>"
             }
             else
             {
@@ -241,8 +262,8 @@
 
             function randomclr()
             {
-                do col = "#" + hex[Math.floor(Math.random() * hex.length)] + hex[Math.floor(Math.random() * hex.length)] + hex[Math.floor(Math.random() * hex.length)]
-                while (col == "#000")
+                do col = "#" + hex[Math.floor(Math.random() * hex.length)] + hex[Math.floor(Math.random() * hex.length)] + hex[Math.floor(Math.random() * hex.length)] + "7"
+                while (col == "#0007")
 
                 return col
             }
@@ -263,8 +284,7 @@
                 pausemenu.style.height = document.body.offsetHeight;
                 pausemenu.style.width = document.body.offsetWidth;
 
-                try        { textFit(timer, {alignHoriz: true, alignVert: true, maxFontSize: 999}) }
-                catch(err) { console.log("Something went wrong with textFit... is timer visible?") }
+                if (game.style.display != "none") {textFit(timer, {alignHoriz: true, alignVert: true, maxFontSize: 999})}
             }
 
             function pulse(col)
@@ -280,29 +300,33 @@
 
             function onbtnclick(element)
             {
-                if (element.innerText == similar[letter])
-                {
-                    time += 3;
-                    timer.innerText = time;
-                    textFit(timer, {alignHoriz: true, alignVert: true, maxFontSize: 999});
-                    clearInterval(interval);
-                    while (table.childNodes[0] != undefined)
-                        table.childNodes[0].remove();
-                    loop();
-                }
-                else
-                {
-                    pulse("#f22");
-                    time = time - 3;
-                    timer.innerText = time;
-                    textFit(timer, {alignHoriz: true, alignVert: true, maxFontSize: 999});
-                    if (time <= 0)
-                        onfail()
-                }
+                if (!failed)
+                    if (element.innerText == similar[letter])
+                    {
+                        time += 3;
+                        timer.innerText = time;
+                        textFit(timer, {alignHoriz: true, alignVert: true, maxFontSize: 999});
+                        clearInterval(interval);
+                        while (table.childNodes[0] != undefined)
+                            table.childNodes[0].remove();
+                        loop();
+                    }
+                    else
+                    {
+                        pulse("#f22");
+                        time = time - 3;
+                        timer.innerText = time;
+                        textFit(timer, {alignHoriz: true, alignVert: true, maxFontSize: 999});
+                        if (time <= 0)
+                            onfail()
+                    }
             }
 
             function onfail()
             {
+                timer.innerText = "";    
+
+                lvltwo = false;
                 failed = true;
                 clearInterval(interval);
 
@@ -315,12 +339,18 @@
                 pausemenu.style.opacity = 1;
                 subtitle.style.opacity = 1;
 
-                
-                game.style.display = "none";
+                document.getElementById("square_" + odd).style.backgroundColor = "#2f2f";
+
+                fadeout = setTimeout(e => 
+                {
+                    game.style.opacity = 0;
+                    game.style.pointerEvents = "none";
+                }, 2000);
                 
                 window.addEventListener("keydown", event => {
                     if (event.code == "Space" && failed == true)
                     {
+                        clearInterval(fadeout);
                         score = 1;
                         time = 3;
 
@@ -331,12 +361,14 @@
 
                         failed = false;
 
-                        setTimeout(() => pausemenu.innerText = "Pause", 200)
+                        setTimeout(() => pausemenu.innerText = "Paused...", 200)
 
                         pausemenu.style.opacity = 0;
                         subtitle.style.opacity = 0;
 
-                        game.style.display = "block";
+                        game.style.opacity = 1;
+                        game.style.pointerEvents = "auto";
+
 
                         textFit(timer, {alignHoriz: true, alignVert: true, maxFontSize: 999})
 
@@ -382,7 +414,7 @@
                         var col = document.createElement("td");
                         id++;
 
-                        if (id == odd) col.innerText = similar[letter];
+                        if (id == odd) col.innerText = similar[letter]
                         else           col.innerText = letter;
                         
                         col.id = "square_" + id;
@@ -403,11 +435,11 @@
                 document.addEventListener("keydown", event => {
                     if (event.code == "Escape")
                     {
-                        if (!inpausetime)
+                        if (!inpausetime && !failed)
                         {
                             if (!paused)
                             {
-                                pausemenu.innerText = "Pause";
+                                pausemenu.innerText = "Paused...";
 
                                 pausemenu.style.opacity = 1;
                                 game.style.display = "none";
