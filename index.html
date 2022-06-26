@@ -217,6 +217,17 @@
                 catch(err) { console.log("Something went wrong with textFit... is timer visible?") }
             }
 
+            function pulse(col)
+            {
+                document.body.style.transition = "background-color .2s linear";
+                document.body.style.backgroundColor = col;
+
+                setTimeout(() => {
+                    document.body.style.transition = "background-color 1s linear";
+                    document.body.style.backgroundColor = "#fff";
+                }, 200);
+            }
+
             function onbtnclick(element)
             {
                 if (element.innerText == similar[letter])
@@ -231,6 +242,7 @@
                 }
                 else
                 {
+                    pulse("#f22");
                     time = time - 3;
                     timer.innerText = time;
                     textFit(timer, {alignHoriz: true, alignVert: true, maxFontSize: 999});
@@ -244,14 +256,7 @@
                 failed = true;
                 clearInterval(interval);
 
-
-                document.body.style.transition = "background-color .2s linear";
-                document.body.style.backgroundColor = "#f22";
-
-                setTimeout(() => {
-                    document.body.style.transition = "background-color 1s linear";
-                    document.body.style.backgroundColor = "#fff";
-                }, 200)
+                pulse("#f22");
 
                 pausemenu.innerText = "You failed!";
 
