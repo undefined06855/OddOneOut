@@ -232,6 +232,10 @@
                 else
                 {
                     time = time - 3;
+                    timer.innerText = time;
+                    textFit(timer, {alignHoriz: true, alignVert: true, maxFontSize: 999});
+                    if (time <= 0)
+                        onfail()
                 }
             }
 
