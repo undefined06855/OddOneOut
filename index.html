@@ -229,6 +229,10 @@
                         table.childNodes[0].remove();
                     loop();
                 }
+                else
+                {
+                    time = time - 3;
+                }
             }
 
             function onfail()
@@ -280,7 +284,7 @@
                 time--;
                 timer.innerText = time;
                 textFit(timer, {alignHoriz: true, alignVert: true, maxFontSize: 999});
-                if (time == 0)
+                if (time <= 0)
                     onfail()
             }
 
