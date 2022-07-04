@@ -24,7 +24,18 @@
                 height: 100vh;
             }
 
-            tr, td {
+            #game {
+                position: fixed;
+                top: 0;
+                left: 0;
+
+                width: 100vw;
+                height: 100vh;
+
+                transition: opacity .5s linear;
+            }
+
+            td {
                 width: auto;
                 height: auto;
 
@@ -40,6 +51,15 @@
                 background-color: rgba(255, 245, 237, .3);
 
                 z-index: 0;
+
+                transition: all .3s cubic-bezier(.5, 0, 1, 1)
+            }
+
+            tr {
+                width: auto;
+                height: auto;
+
+                overflow: hidden;
             }
 
             #flex-center {
@@ -63,16 +83,7 @@
                 z-index: -2;
             }
 
-            #game {
-                position: fixed;
-                top: 0;
-                left: 0;
 
-                width: 100vw;
-                height: 100vh;
-
-                transition: opacity .5s linear;
-            }
 
             #pause, #subtitle {
                 pointer-events: none;
@@ -230,30 +241,42 @@
               , running = false
               , failed = false
               , lvltwo = false
+              , lvlthr = false
               , col = "#err"
               , fadeout = -1
+              , inverted = false
+              , mmv = score // Max amount of movement for level three
+              , dmv = 30 - mmv * 2
+              , debug = true
+              ;
 
             game.style.display = "block";
             
-            pausemenu.innerHTML = "Press spacebar to start";
-            subtitle.innerHTML = "Press esc to pause!<br/><br/><small>Please note: this game is not compatible with screen readers or using tab to navigate.</small>"
 
             if (mobile)
             {
                 pausemenu.style.opacity = 1;
-                pausemenu.innerHTML = "<hr/>You are on a mobile device.<br/>Please switch to a computer.<hr/>"
+                pausemenu.innerHTML = "<hr/><br/><br/>You are on a mobile device.<br/>Please switch to a computer.<hr/>"
             }
             else
             {
+                pausemenu.innerHTML = "Press spacebar to start";
+                subtitle.innerHTML = "Press esc to pause!<br/><br/><small>Please note: this game is not compatible with screen readers or using tab to navigate.</small>"
                 window.addEventListener("keydown", event => {
                     if (event.code == "Space" && !running)
                     {
+                        if (debug)
+                        {
+                            lvltwo = true;
+                            time = Infinity;
+                            score = 18;
+                        }
                         running = true;
                         pausemenu.style.opacity = 0;
                         subtitle.style.opacity = 0;
                         timer.style.display = "block";
                         maingame();
-                    }    
+                    }
                 })
             }
 
@@ -269,6 +292,7 @@
             }
             function resize()
             {
+                pulse("#22f")
                 if (document.body.offsetWidth < document.body.offsetHeight)
                 {
                     wrapper.style.width = "85vw";
@@ -298,28 +322,62 @@
                 }, 75);
             }
 
+            function randoffset()
+            {
+                var max = 15 / mmv
+                return Math.random() * max * 2 - max;
+            }
+
             function onbtnclick(element)
             {
                 if (!failed)
-                    if (element.innerText == similar[letter])
+                {
+                    if (inverted)
                     {
-                        time += 3;
-                        timer.innerText = time;
-                        textFit(timer, {alignHoriz: true, alignVert: true, maxFontSize: 999});
-                        clearInterval(interval);
-                        while (table.childNodes[0] != undefined)
-                            table.childNodes[0].remove();
-                        loop();
+                        if (element.innerText == letter)
+                        {
+                            time += 3;
+                            timer.innerText = time;
+                            textFit(timer, {alignHoriz: true, alignVert: true, maxFontSize: 999});
+                            clearInterval(interval);
+                            while (table.childNodes[0] != undefined)
+                                table.childNodes[0].remove();
+                            loop();
+                        }
+                        else
+                        {
+                            pulse("#f22");
+                            time = time - 3;
+                            timer.innerText = time;
+                            textFit(timer, {alignHoriz: true, alignVert: true, maxFontSize: 999});
+                            if (time <= 0)
+                                onfail()
+                        }
                     }
                     else
                     {
-                        pulse("#f22");
-                        time = time - 3;
-                        timer.innerText = time;
-                        textFit(timer, {alignHoriz: true, alignVert: true, maxFontSize: 999});
-                        if (time <= 0)
-                            onfail()
+                        if (element.innerText == similar[letter])
+                        {
+                            time += 3;
+                            timer.innerText = time;
+                            textFit(timer, {alignHoriz: true, alignVert: true, maxFontSize: 999});
+                            clearInterval(interval);
+                            while (table.childNodes[0] != undefined)
+                                table.childNodes[0].remove();
+                            loop();
+                        }
+                        else
+                        {
+                            pulse("#f22");
+                            time = time - 3;
+                            timer.innerText = time;
+                            textFit(timer, {alignHoriz: true, alignVert: true, maxFontSize: 999});
+                            if (time <= 0)
+                                onfail()
+                        }
                     }
+
+                }
             }
 
             function onfail()
@@ -369,7 +427,6 @@
                         game.style.opacity = 1;
                         game.style.pointerEvents = "auto";
 
-
                         textFit(timer, {alignHoriz: true, alignVert: true, maxFontSize: 999})
 
                         loop();
@@ -390,6 +447,10 @@
             {
                 interval = setInterval(intervalFunc, 1000);
                 score++;
+
+                mmv = score;
+                dmv = (mmv - 20) * 2
+
                 sizedisp.innerText = score
 
                 letter = Object.keys(similar)[Math.floor(Math.random() * Object.keys(similar).length)];
@@ -399,10 +460,19 @@
                 {
                     score = 2;
                     pulse("#2f2");
-                    lvltwo = true;
+                    if (!lvltwo && !lvlthr)
+                        lvltwo = true;
+                    else if (!lvlthr && lvltwo)
+                    {
+                        lvltwo = false;
+                        lvlthr = true;
+                    }
+                    else if (!lvltwo && lvlthr)
+                        lvltwo = true;
                 }
 
                 odd = Math.floor(Math.random() * score ** 2);
+                inverted = Math.random() < .5;
 
                 for (var tr = 0; tr < score; tr++)
                 {
@@ -414,13 +484,42 @@
                         var col = document.createElement("td");
                         id++;
 
-                        if (id == odd) col.innerText = similar[letter]
-                        else           col.innerText = letter;
-                        
+                        if (inverted)
+                        {
+                            if (id == odd && !debug) col.innerText = letter
+                            else if (id == odd)
+                            {
+                                col.innerText = letter;
+                                col.style.border = "10px solid red"
+                            }
+                            else           col.innerText = similar[letter];
+                            if (id == odd) col.style.zIndex = 1000;
+                        }
+                        else
+                        {
+                            if (id == odd && !debug) col.innerText = similar[letter]
+                            else if (id == odd)
+                            {
+                                col.innerText = similar[letter];
+                                col.style.border = "10px solid red"
+                            }
+                            else           col.innerText = letter;
+                            if (id == odd)
+                                col.style.zIndex = 1000;
+                        }
+
                         col.id = "square_" + id;
                         col.style.fontSize = (1 - (score - 20)/10) + "em"
-                        if (lvltwo)
+                        if (lvltwo && !lvlthr)
                             col.style.backgroundColor = randomclr();
+                        else if (lvlthr && !lvltwo)
+                            col.style.transform = "translate(" + randoffset() + "vw, " + randoffset() + "vw)";
+                        else
+                        {
+                            col.style.backgroundColor = randomclr();
+                            col.style.transform = "translate(" + randoffset() + "vw, " + randoffset() + "vw)";
+                        }
+                        
                         col.setAttribute("onclick", "onbtnclick(this)");
                         row.appendChild(col);
                     }
