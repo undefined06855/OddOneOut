@@ -247,7 +247,7 @@
               , inverted = false
               , mmv = score // Max amount of movement for level three
               , dmv = 30 - mmv * 2
-              , debug = true
+              , debug = false
               ;
 
             game.style.display = "block";
@@ -514,7 +514,7 @@
                             col.style.backgroundColor = randomclr();
                         else if (lvlthr && !lvltwo)
                             col.style.transform = "translate(" + randoffset() + "vw, " + randoffset() + "vw)";
-                        else
+                        else if (lvlthr && lvltwo)
                         {
                             col.style.backgroundColor = randomclr();
                             col.style.transform = "translate(" + randoffset() + "vw, " + randoffset() + "vw)";
