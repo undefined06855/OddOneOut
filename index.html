@@ -256,7 +256,7 @@
             if (mobile)
             {
                 pausemenu.style.opacity = 1;
-                pausemenu.innerHTML = "<hr/><br/><br/>You are on a mobile device.<br/>Please switch to a computer.<hr/>"
+                pausemenu.innerHTML = "<hr/><br/><small>You are on a mobile device.<br/>Please switch to a computer.<hr/></small>"
             }
             else
             {
@@ -271,6 +271,7 @@
                             time = Infinity;
                             score = 18;
                         }
+
                         running = true;
                         pausemenu.style.opacity = 0;
                         subtitle.style.opacity = 0;
