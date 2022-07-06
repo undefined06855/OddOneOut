@@ -349,6 +349,7 @@
               , mmv = score // Max amount of movement for level three
               , debug = false
               , menuopen = false
+              , level = 1 // Only for display, never called
               ;
 
             game.style.display = "block";
@@ -373,6 +374,7 @@
                         }
 
                         running = true;
+                        if (menuopen) menutoggle(.25);
                         pausemenu.style.opacity = 0;
                         subtitle.style.opacity = 0;
                         timer.style.display = "block";
@@ -427,21 +429,40 @@
                 pausemenu.style.height = document.body.offsetHeight;
                 pausemenu.style.width = document.body.offsetWidth;
 
+                textFit(sizedisp, {alignHoriz: true, alignVert: true, maxFontSize: 999})
+
                 if (game.style.display != "none") {textFit(timer, {alignHoriz: true, alignVert: true, maxFontSize: 999})}
             }
 
-            function menutoggle()
+            function menutoggle(time)
             {
-                if (menuopen)
+                if (time == undefined)
                 {
-                    options.style.transition = "transform .5s cubic-bezier(0.6, -0.28, 0.74, 0.05)"
-                    requestAnimationFrame(() => options.style.transform = "scale(0)") 
+                    if (menuopen)
+                    {
+                        options.style.transition = "transform .5s cubic-bezier(0.6, -0.28, 0.74, 0.05)"
+                        requestAnimationFrame(() => options.style.transform = "scale(0)") 
+                    }
+                    else
+                    {
+                        options.style.transition = "transform .5s cubic-bezier(0.18, 0.89, 0.32, 1.28)"
+                        requestAnimationFrame(() => options.style.transform = "scale(1)")
+                    }
                 }
                 else
                 {
-                    options.style.transition = "transform .5s cubic-bezier(0.18, 0.89, 0.32, 1.28)"
-                    requestAnimationFrame(() => options.style.transform = "scale(1)")
+                    if (menuopen)
+                    {
+                        options.style.transition = "transform " + time + "s cubic-bezier(0.6, -0.28, 0.74, 0.05)"
+                        requestAnimationFrame(() => options.style.transform = "scale(0)") 
+                    }
+                    else
+                    {
+                        options.style.transition = "transform " + time + "s cubic-bezier(0.18, 0.89, 0.32, 1.28)"
+                        requestAnimationFrame(() => options.style.transform = "scale(1)")
+                    }
                 }
+                    
                 menuopen = !menuopen;
             }
 
@@ -571,7 +592,8 @@
                 mmv = score;
                 dmv = (mmv - 20) * 2
 
-                sizedisp.innerText = score
+                sizedisp.innerHTML = "Size: " + score + "<br/>Level: " + level;
+                textFit(sizedisp, {alignHoriz: true, alignVert: true, maxFontSize: 999})
 
                 letter = Object.keys(similar)[Math.floor(Math.random() * Object.keys(similar).length)];
                 id = -1;
@@ -580,6 +602,7 @@
                 {
                     score = 2;
                     pulse("#2f2");
+                    level++;
                     if (!lvltwo && !lvlthr)
                         lvltwo = true;
                     else if (!lvlthr && lvltwo)
